@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% block title %}Главная — Capitalize{% endblock %}
+
+{% block extra_css %}
+<style>
+.chart-container {
+    position: relative;
+    height: 200px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Шапка -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Привет, {{ request.user.username }} 👋</h4>
+        <p class="text-muted small mb-0">Финансовый обзор</p>
+    </div>
+    <a href="{% url 'transaction_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Добавить
+    </a>
+</div>
+
+<!-- Статы -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="balance-card p-4">
+            <p class="stat-label" style="color:rgba(255,255,255,0.5);">Баланс</p>
+            <h2 class="fw-bold text-white mb-0" style="position:relative;z-index:1;">
+                {{ request.user.profile.balance }}
+                <span class="fs-5 opacity-60">сом</span>
+            </h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p class="stat-label">Доходы</p>
+            <p class="stat-value text-success mb-0">
+                +{{ total_income }}<span class="fs-6 fw-normal"> сом</span>
+            </p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p class="stat-label">Расходы</p>
+            <p class="stat-value text-danger mb-0">
+                −{{ total_expense }}<span class="fs-6 fw-normal"> сом</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Ожидающие -->
+{% if pending %}
+<div class="card mb-4" style="border-color:rgba(245,158,11,0.3);">
+    <div class="card-header" style="color:#fbbf24;">
+        <i class="bi bi-clock-history me-2"></i>Ожидают подтверждения — {{ pending.count }}
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for t in pending %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <span class="fw-semibold small">{{ t.title }}</span>
+                <small class="text-muted ms-2">{{ t.created_at|date:"d.m H:i" }}</small>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="text-warning fw-bold small">{{ t.amount }} сом</span>
+                <a href="{% url 'transaction_confirm' t.pk %}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-check-lg"></i>
+                </a>
+                <a href="{% url 'transaction_cancel' t.pk %}" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- График + Транзакции -->
+<div class="row g-4 mb-4">
+
+    <!-- График расходов -->
+    <div class="col-md-7">
+        <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 fw-semibold">
+                    <i class="bi bi-bar-chart me-2" style="color:#818cf8;"></i>Расходы за 7 дней
+                </h6>
+            </div>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Разбивка по категориям -->
+    <div class="col-md-5">
+        <div class="card p-4 h-100">
+            <h6 class="mb-3 fw-semibold">
+                <i class="bi bi-pie-chart me-2" style="color:#a78bfa;"></i>По категориям
+            </h6>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span class="badge badge-base">🏠 База</span>
+                    <span class="text-muted">{{ stats.base }} сом</span>
+                </div>
+                <div class="progress" style="height:6px;">
+                    <div class="progress-bar" style="background:#3b82f6;
+                        width:{% if stats.total > 0 %}{% widthratio stats.base stats.total 100 %}{% else %}0{% endif %}%;">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span class="badge badge-wants">✨ Хотелки</span>
+                    <span class="text-muted">{{ stats.wants }} сом</span>
+                </div>
+                <div class="progress" style="height:6px;">
+                    <div class="progress-bar" style="background:#f59e0b;
+                        width:{% if stats.total > 0 %}{% widthratio stats.wants stats.total 100 %}{% else %}0{% endif %}%;">
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span class="badge badge-invest">📈 Инвестиции</span>
+                    <span class="text-muted">{{ stats.invest }} сом</span>
+                </div>
+                <div class="progress" style="height:6px;">
+                    <div class="progress-bar" style="background:#10b981;
+                        width:{% if stats.total > 0 %}{% widthratio stats.invest stats.total 100 %}{% else %}0{% endif %}%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Транзакции + Цели -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-arrow-left-right me-2"></i>Последние операции</span>
+                <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline-secondary">Все →</a>
+            </div>
+            {% if transactions %}
+            <ul class="list-group list-group-flush">
+                {% for t in transactions %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="tx-icon"
+                             style="background:{% if t.transaction_type == 'income' %}rgba(16,185,129,0.15){% else %}rgba(239,68,68,0.12){% endif %};">
+                            <i class="bi {% if t.transaction_type == 'income' %}bi-arrow-down-left text-success{% else %}bi-arrow-up-right text-danger{% endif %}"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 small fw-semibold">{{ t.title }}</p>
+                            <span class="badge {% if t.category == 'base' %}badge-base{% elif t.category == 'wants' %}badge-wants{% else %}badge-invest{% endif %}"
+                                  style="font-size:0.62rem;">
+                                {{ t.get_category_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="fw-bold small {% if t.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                        {% if t.transaction_type == 'income' %}+{% else %}−{% endif %}{{ t.amount }}
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox fs-2 text-muted d-block mb-2"></i>
+                <p class="text-muted small mb-3">Нет транзакций</p>
+                <a href="{% url 'transaction_add' %}" class="btn btn-sm btn-primary">Добавить</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-trophy me-2"></i>Активные цели</span>
+                <a href="{% url 'goal_list' %}" class="btn btn-sm btn-outline-secondary">Все →</a>
+            </div>
+            {% if goals %}
+            <div class="card-body">
+                {% for goal in goals %}
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-semibold">{{ goal.title }}</span>
+                        <span class="small fw-bold" style="color:#a78bfa;">{{ goal.progress_percent }}%</span>
+                    </div>
+                    <div class="progress mb-1" style="height:6px;">
+                        <div class="progress-bar" style="width:{{ goal.progress_percent }}%;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">{{ goal.current_amount }} сом</small>
+                        <small class="text-muted">{{ goal.target_amount }} сом</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card-body text-center py-5">
+                <i class="bi bi-trophy fs-2 text-muted d-block mb-2"></i>
+                <p class="text-muted small mb-3">Нет активных целей</p>
+                <a href="{% url 'goal_add' %}" class="btn btn-sm btn-primary">Создать цель</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('expenseChart').getContext('2d');
+const chartData = {{ chart_data|safe }};
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: chartData.labels,
+        datasets: [{
+            label: 'Расходы',
+            data: chartData.values,
+            backgroundColor: 'rgba(99,102,241,0.3)',
+            borderColor: 'rgba(129,140,248,0.8)',
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(10,14,30,0.9)',
+                borderColor: 'rgba(255,255,255,0.1)',
+                borderWidth: 1,
+                titleColor: '#94a3b8',
+                bodyColor: '#e2e8f0',
+                padding: 10,
+                callbacks: {
+                    label: ctx => `${ctx.parsed.y} сом`
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: { color: '#475569', font: { size: 11 } }
+            },
+            y: {
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: { color: '#475569', font: { size: 11 } },
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

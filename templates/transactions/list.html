@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}Транзакции — Capitalize{% endblock %}
+
+{% block content %}
+
+<!-- Статистика по категориям -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p class="stat-label">🏠 База</p>
+            <h5 class="fw-bold text-info mb-0">{{ stats.base }} сом</h5>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p class="stat-label">✨ Хотелки</p>
+            <h5 class="fw-bold text-warning mb-0">{{ stats.wants }} сом</h5>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p class="stat-label">📈 Инвестиции</p>
+            <h5 class="fw-bold text-success mb-0">{{ stats.invest }} сом</h5>
+        </div>
+    </div>
+</div>
+
+<!-- Ожидающие подтверждения -->
+{% if pending %}
+<div class="card mb-4" style="border-color: rgba(245,158,11,0.3);">
+    <div class="card-header" style="color:#fbbf24;">
+        <i class="bi bi-clock-history me-2"></i>Ожидают подтверждения (правило 24ч) — {{ pending.count }}
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for t in pending %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <span class="fw-semibold small">{{ t.title }}</span>
+                <span class="badge bg-warning text-dark ms-2">⏳ Ожидает</span>
+                <small class="text-muted ms-2">{{ t.created_at|date:"d.m.Y H:i" }}</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-warning small">{{ t.amount }} сом</span>
+                <a href="{% url 'transaction_confirm' t.pk %}"
+                   class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-check-lg"></i> Подтвердить
+                </a>
+                <a href="{% url 'transaction_cancel' t.pk %}"
+                   class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Отменить покупку?')">
+                    <i class="bi bi-x-lg"></i> Отменить
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- Фильтры -->
+<div class="card p-3 mb-3">
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label">Категория</label>
+            <select name="category" class="form-select form-select-sm">
+                <option value="">Все категории</option>
+                <option value="base" {% if current_category == 'base' %}selected{% endif %}>🏠 База</option>
+                <option value="wants" {% if current_category == 'wants' %}selected{% endif %}>✨ Хотелки</option>
+                <option value="invest" {% if current_category == 'invest' %}selected{% endif %}>📈 Инвестиции</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Тип</label>
+            <select name="type" class="form-select form-select-sm">
+                <option value="">Все типы</option>
+                <option value="income" {% if current_type == 'income' %}selected{% endif %}>Доходы</option>
+                <option value="expense" {% if current_type == 'expense' %}selected{% endif %}>Расходы</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm w-100">
+                <i class="bi bi-funnel"></i> Фильтр
+            </button>
+            <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary btn-sm w-100">
+                Сброс
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Заголовок + кнопка добавить -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Все транзакции</h5>
+    <a href="{% url 'transaction_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Добавить
+    </a>
+</div>
+
+<!-- Список транзакций -->
+{% if transactions %}
+<div class="card">
+    <ul class="list-group list-group-flush">
+        {% for t in transactions %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <div class="tx-icon"
+                     style="background:{% if t.transaction_type == 'income' %}rgba(16,185,129,0.15){% else %}rgba(239,68,68,0.12){% endif %};">
+                    <i class="bi {% if t.transaction_type == 'income' %}bi-arrow-down-left text-success{% else %}bi-arrow-up-right text-danger{% endif %}"></i>
+                </div>
+                <div>
+                    <p class="mb-0 small fw-semibold">{{ t.title }}</p>
+                    <div class="d-flex align-items-center gap-2 mt-1">
+                        <span class="badge
+                            {% if t.category == 'base' %}badge-base
+                            {% elif t.category == 'wants' %}badge-wants
+                            {% else %}badge-invest{% endif %}"
+                            style="font-size:0.65rem;">
+                            {{ t.get_category_display }}
+                        </span>
+                        <small class="text-muted">{{ t.created_at|date:"d.m.Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="fw-bold small
+                    {% if t.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                    {% if t.transaction_type == 'income' %}+{% else %}−{% endif %}{{ t.amount }} сом
+                </span>
+                <a href="{% url 'transaction_delete' t.pk %}"
+                   class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Удалить транзакцию?')">
+                    <i class="bi bi-trash"></i>
+                </a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% else %}
+<div class="card p-5 text-center">
+    <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+    {% if current_category or current_type %}
+        <p class="text-muted">По выбранным фильтрам ничего не найдено.</p>
+        <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary mx-auto" style="width:fit-content;">
+            Сбросить фильтры
+        </a>
+    {% else %}
+        <p class="text-muted">Транзакций пока нет. Добавь первую!</p>
+        <a href="{% url 'transaction_add' %}" class="btn btn-primary mx-auto" style="width:fit-content;">
+            <i class="bi bi-plus-lg"></i> Добавить транзакцию
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
