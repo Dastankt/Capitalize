@@ -1,31 +1,51 @@
 {% extends 'base.html' %}
-{% block title %}Пополнить цель{% endblock %}
+{% block title %}Пополнить цель — Capitalize{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-5">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{% url 'goal_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h5 class="fw-700 ls-tight mb-0">{{ goal.title }}</h5>
+                <p style="color:var(--text-3);font-size:0.8rem;margin:0;">Пополни накопления</p>
+            </div>
+        </div>
+
         <div class="card p-4">
-            <h4 class="mb-1"><i class="bi bi-piggy-bank"></i> {{ goal.title }}</h4>
-            <p class="text-muted mb-3">
-                Накоплено: {{ goal.current_amount }} / {{ goal.target_amount }} сом
-            </p>
-            <div class="progress mb-4" style="height: 10px;">
-                <div class="progress-bar bg-purple"
-                     style="width: {{ goal.progress_percent }}%; background-color: #7c6af7;">
+
+            <!-- Прогресс -->
+            <div class="p-3 rounded-12 mb-4"
+                 style="background:rgba(129,140,248,0.06);border:1px solid rgba(129,140,248,0.12);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span style="font-size:0.82rem;color:var(--text-2);">Прогресс</span>
+                    <span class="fw-700" style="color:var(--purple);">{{ goal.progress_percent }}%</span>
+                </div>
+                <div class="progress mb-2" style="height:8px;">
+                    <div class="progress-bar" style="width:{{ goal.progress_percent }}%;"></div>
+                </div>
+                <div class="d-flex justify-content-between" style="font-size:0.8rem;color:var(--text-3);">
+                    <span>{{ goal.current_amount }} сом</span>
+                    <span>{{ goal.target_amount }} сом</span>
                 </div>
             </div>
+
             <form method="post">
                 {% csrf_token %}
                 <div class="mb-3">
                     <label class="form-label">{{ form.amount.label }}</label>
                     {{ form.amount }}
                 </div>
-                <p class="small text-muted">
-                    Доступно на балансе: {{ request.user.profile.balance }} сом
+                <p style="font-size:0.8rem;color:var(--text-3);" class="mb-4">
+                    <i class="bi bi-wallet2 me-1"></i>
+                    Доступно на балансе: <strong style="color:var(--text-2);">{{ request.user.profile.balance }} сом</strong>
                 </p>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-plus-lg"></i> Пополнить
+                        <i class="bi bi-plus-lg me-1"></i>Пополнить
                     </button>
                     <a href="{% url 'goal_list' %}" class="btn btn-outline-secondary w-100">
                         Отмена
@@ -33,6 +53,7 @@
                 </div>
             </form>
         </div>
+
     </div>
 </div>
 {% endblock %}

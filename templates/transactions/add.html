@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
-{% block title %}Добавить транзакцию{% endblock %}
+{% block title %}Новая транзакция — Capitalize{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-5">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <a href="{% url 'transaction_list' %}"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h5 class="fw-700 ls-tight mb-0">Новая транзакция</h5>
+                <p style="color:var(--text-3);font-size:0.8rem;margin:0;">Запиши доход или расход</p>
+            </div>
+        </div>
+
         <div class="card p-4">
-            <h5 class="fw-bold mb-4">
-                <i class="bi bi-plus-circle me-2" style="color:#818cf8;"></i>Новая транзакция
-            </h5>
             <form method="post">
                 {% csrf_token %}
                 {% for field in form %}
@@ -15,29 +24,34 @@
                     <label class="form-label">{{ field.label }}</label>
                     {{ field }}
                     {% for error in field.errors %}
-                        <div class="text-danger small mt-1">
+                        <div class="mt-1" style="color:var(--red);font-size:0.8rem;">
                             <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
                         </div>
                     {% endfor %}
                 </div>
                 {% endfor %}
 
-                <!-- Подсказка про 24 часа -->
-                <div class="alert alert-warning d-flex gap-2 align-items-start mb-4">
-                    <i class="bi bi-clock-history mt-1"></i>
-                    <small>Расходы от <strong>500 сом</strong> уйдут на подтверждение через 24 часа — защита от импульсивных покупок.</small>
+                <!-- Подсказка 24ч -->
+                <div class="d-flex gap-2 align-items-start p-3 rounded-12 mb-4"
+                     style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.15);">
+                    <i class="bi bi-clock" style="color:var(--yellow);margin-top:2px;"></i>
+                    <p style="font-size:0.8rem;color:var(--yellow);margin:0;line-height:1.5;">
+                        Расходы из <strong>Хотелок</strong> от 500 сом уходят на подтверждение через 24 часа — защита от импульсивных покупок.
+                    </p>
                 </div>
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-check-lg me-1"></i>Сохранить
                     </button>
-                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary w-100">
+                    <a href="{% url 'transaction_list' %}"
+                       class="btn btn-outline-secondary w-100">
                         Отмена
                     </a>
                 </div>
             </form>
         </div>
+
     </div>
 </div>
 {% endblock %}

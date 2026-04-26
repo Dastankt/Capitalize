@@ -3,10 +3,7 @@
 
 {% block extra_css %}
 <style>
-.chart-container {
-    position: relative;
-    height: 200px;
-}
+.chart-wrap { position: relative; height: 190px; }
 </style>
 {% endblock %}
 
@@ -15,8 +12,12 @@
 <!-- Шапка -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="fw-bold mb-1">Привет, {{ request.user.username }} 👋</h4>
-        <p class="text-muted small mb-0">Финансовый обзор</p>
+        <h4 class="fw-800 ls-tight mb-1">
+            Привет, {{ request.user.username }} 👋
+        </h4>
+        <p style="color:var(--text-3);font-size:0.85rem;margin:0;">
+            {{ request.user.profile.balance|floatformat:0 }} сом на балансе
+        </p>
     </div>
     <a href="{% url 'transaction_add' %}" class="btn btn-primary">
         <i class="bi bi-plus-lg me-1"></i>Добавить
@@ -25,28 +26,30 @@
 
 <!-- Статы -->
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="balance-card p-4">
-            <p class="stat-label" style="color:rgba(255,255,255,0.5);">Баланс</p>
-            <h2 class="fw-bold text-white mb-0" style="position:relative;z-index:1;">
-                {{ request.user.profile.balance }}
-                <span class="fs-5 opacity-60">сом</span>
+    <div class="col-md-4 fade-in-up">
+        <div class="balance-card p-4" style="min-height:110px;">
+            <p class="stat-label" style="color:rgba(255,255,255,0.45);">Текущий баланс</p>
+            <h2 class="fw-900 ls-tight text-white mb-0" style="position:relative;z-index:1;">
+                {{ request.user.profile.balance|floatformat:0 }}
+                <span style="font-size:1rem;opacity:0.6;font-weight:500;"> сом</span>
             </h2>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="stat-card">
+    <div class="col-md-4 fade-in-up">
+        <div class="stat-card" style="min-height:110px;">
             <p class="stat-label">Доходы</p>
-            <p class="stat-value text-success mb-0">
-                +{{ total_income }}<span class="fs-6 fw-normal"> сом</span>
+            <p class="stat-value mb-0" style="color:var(--green);">
+                +{{ total_income|floatformat:0 }}
+                <span style="font-size:0.9rem;font-weight:500;"> сом</span>
             </p>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="stat-card">
+    <div class="col-md-4 fade-in-up">
+        <div class="stat-card" style="min-height:110px;">
             <p class="stat-label">Расходы</p>
-            <p class="stat-value text-danger mb-0">
-                −{{ total_expense }}<span class="fs-6 fw-normal"> сом</span>
+            <p class="stat-value mb-0" style="color:var(--red);">
+                −{{ total_expense|floatformat:0 }}
+                <span style="font-size:0.9rem;font-weight:500;"> сом</span>
             </p>
         </div>
     </div>
@@ -54,23 +57,32 @@
 
 <!-- Ожидающие -->
 {% if pending %}
-<div class="card mb-4" style="border-color:rgba(245,158,11,0.3);">
-    <div class="card-header" style="color:#fbbf24;">
-        <i class="bi bi-clock-history me-2"></i>Ожидают подтверждения — {{ pending.count }}
+<div class="card mb-4" style="border-color:rgba(251,191,36,0.2);">
+    <div class="card-header" style="color:var(--yellow);">
+        <i class="bi bi-clock-history"></i>
+        Ожидают подтверждения
+        <span class="ms-auto"
+              style="background:rgba(251,191,36,0.12);color:var(--yellow);border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;">
+            {{ pending.count }}
+        </span>
     </div>
     <ul class="list-group list-group-flush">
         {% for t in pending %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-                <span class="fw-semibold small">{{ t.title }}</span>
-                <small class="text-muted ms-2">{{ t.created_at|date:"d.m H:i" }}</small>
+                <p class="fw-600 mb-0" style="font-size:0.875rem;">{{ t.title }}</p>
+                <small style="color:var(--text-3);">{{ t.created_at|date:"d.m H:i" }}</small>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-                <span class="text-warning fw-bold small">{{ t.amount }} сом</span>
-                <a href="{% url 'transaction_confirm' t.pk %}" class="btn btn-sm btn-outline-success">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-700" style="color:var(--yellow);font-size:0.875rem;">
+                    {{ t.amount }} сом
+                </span>
+                <a href="{% url 'transaction_confirm' t.pk %}"
+                   class="btn btn-sm btn-outline-success">
                     <i class="bi bi-check-lg"></i>
                 </a>
-                <a href="{% url 'transaction_cancel' t.pk %}" class="btn btn-sm btn-outline-danger">
+                <a href="{% url 'transaction_cancel' t.pk %}"
+                   class="btn btn-sm btn-outline-danger">
                     <i class="bi bi-x-lg"></i>
                 </a>
             </div>
@@ -80,59 +92,63 @@
 </div>
 {% endif %}
 
-<!-- График + Транзакции -->
-<div class="row g-4 mb-4">
-
-    <!-- График расходов -->
+<!-- График + Категории -->
+<div class="row g-3 mb-4">
     <div class="col-md-7">
         <div class="card p-4 h-100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0 fw-semibold">
-                    <i class="bi bi-bar-chart me-2" style="color:#818cf8;"></i>Расходы за 7 дней
-                </h6>
+                <p class="section-title mb-0">
+                    <i class="bi bi-bar-chart-fill text-purple"></i>
+                    Расходы за 7 дней
+                </p>
             </div>
-            <div class="chart-container">
+            <div class="chart-wrap">
                 <canvas id="expenseChart"></canvas>
             </div>
         </div>
     </div>
-
-    <!-- Разбивка по категориям -->
     <div class="col-md-5">
         <div class="card p-4 h-100">
-            <h6 class="mb-3 fw-semibold">
-                <i class="bi bi-pie-chart me-2" style="color:#a78bfa;"></i>По категориям
-            </h6>
+            <p class="section-title mb-4">
+                <i class="bi bi-pie-chart-fill text-purple-2"></i>
+                По категориям
+            </p>
             <div class="mb-3">
-                <div class="d-flex justify-content-between small mb-1">
-                    <span class="badge badge-base">🏠 База</span>
-                    <span class="text-muted">{{ stats.base }} сом</span>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="badge-base">🏠 База</span>
+                    <span style="font-size:0.82rem;font-weight:600;color:var(--text-2);">
+                        {{ stats.base|floatformat:0 }} сом
+                    </span>
                 </div>
-                <div class="progress" style="height:6px;">
-                    <div class="progress-bar" style="background:#3b82f6;
-                        width:{% if stats.total > 0 %}{% widthratio stats.base stats.total 100 %}{% else %}0{% endif %}%;">
+                <div class="progress" style="height:5px;">
+                    <div class="progress-bar"
+                         style="width:{% if stats.total > 0 %}{% widthratio stats.base stats.total 100 %}{% else %}0{% endif %}%;background:#3b82f6;">
                     </div>
                 </div>
             </div>
             <div class="mb-3">
-                <div class="d-flex justify-content-between small mb-1">
-                    <span class="badge badge-wants">✨ Хотелки</span>
-                    <span class="text-muted">{{ stats.wants }} сом</span>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="badge-wants">✨ Хотелки</span>
+                    <span style="font-size:0.82rem;font-weight:600;color:var(--text-2);">
+                        {{ stats.wants|floatformat:0 }} сом
+                    </span>
                 </div>
-                <div class="progress" style="height:6px;">
-                    <div class="progress-bar" style="background:#f59e0b;
-                        width:{% if stats.total > 0 %}{% widthratio stats.wants stats.total 100 %}{% else %}0{% endif %}%;">
+                <div class="progress" style="height:5px;">
+                    <div class="progress-bar"
+                         style="width:{% if stats.total > 0 %}{% widthratio stats.wants stats.total 100 %}{% else %}0{% endif %}%;background:#f59e0b;">
                     </div>
                 </div>
             </div>
-            <div class="mb-3">
-                <div class="d-flex justify-content-between small mb-1">
-                    <span class="badge badge-invest">📈 Инвестиции</span>
-                    <span class="text-muted">{{ stats.invest }} сом</span>
+            <div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="badge-invest">📈 Инвестиции</span>
+                    <span style="font-size:0.82rem;font-weight:600;color:var(--text-2);">
+                        {{ stats.invest|floatformat:0 }} сом
+                    </span>
                 </div>
-                <div class="progress" style="height:6px;">
-                    <div class="progress-bar" style="background:#10b981;
-                        width:{% if stats.total > 0 %}{% widthratio stats.invest stats.total 100 %}{% else %}0{% endif %}%;">
+                <div class="progress" style="height:5px;">
+                    <div class="progress-bar"
+                         style="width:{% if stats.total > 0 %}{% widthratio stats.invest stats.total 100 %}{% else %}0{% endif %}%;background:#10b981;">
                     </div>
                 </div>
             </div>
@@ -141,12 +157,17 @@
 </div>
 
 <!-- Транзакции + Цели -->
-<div class="row g-4">
+<div class="row g-3">
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-arrow-left-right me-2"></i>Последние операции</span>
-                <a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline-secondary">Все →</a>
+            <div class="card-header">
+                <i class="bi bi-arrow-left-right text-purple"></i>
+                Последние операции
+                <a href="{% url 'transaction_list' %}"
+                   class="btn btn-sm btn-outline-secondary ms-auto"
+                   style="font-size:0.75rem;">
+                    Все →
+                </a>
             </div>
             {% if transactions %}
             <ul class="list-group list-group-flush">
@@ -154,27 +175,27 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-3">
                         <div class="tx-icon"
-                             style="background:{% if t.transaction_type == 'income' %}rgba(16,185,129,0.15){% else %}rgba(239,68,68,0.12){% endif %};">
-                            <i class="bi {% if t.transaction_type == 'income' %}bi-arrow-down-left text-success{% else %}bi-arrow-up-right text-danger{% endif %}"></i>
+                             style="background:{% if t.transaction_type == 'income' %}rgba(52,211,153,0.12){% else %}rgba(248,113,113,0.1){% endif %};">
+                            <i class="bi {% if t.transaction_type == 'income' %}bi-arrow-down-left{% else %}bi-arrow-up-right{% endif %}"
+                               style="color:{% if t.transaction_type == 'income' %}var(--green){% else %}var(--red){% endif %};"></i>
                         </div>
                         <div>
-                            <p class="mb-0 small fw-semibold">{{ t.title }}</p>
-                            <span class="badge {% if t.category == 'base' %}badge-base{% elif t.category == 'wants' %}badge-wants{% else %}badge-invest{% endif %}"
-                                  style="font-size:0.62rem;">
+                            <p class="mb-0 fw-600" style="font-size:0.875rem;">{{ t.title }}</p>
+                            <span class="badge-{% if t.category == 'base' %}base{% elif t.category == 'wants' %}wants{% else %}invest{% endif %}">
                                 {{ t.get_category_display }}
                             </span>
                         </div>
                     </div>
-                    <span class="fw-bold small {% if t.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
-                        {% if t.transaction_type == 'income' %}+{% else %}−{% endif %}{{ t.amount }}
+                    <span class="fw-700" style="font-size:0.875rem;color:{% if t.transaction_type == 'income' %}var(--green){% else %}var(--red){% endif %};">
+                        {% if t.transaction_type == 'income' %}+{% else %}−{% endif %}{{ t.amount|floatformat:0 }}
                     </span>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-            <div class="card-body text-center py-5">
-                <i class="bi bi-inbox fs-2 text-muted d-block mb-2"></i>
-                <p class="text-muted small mb-3">Нет транзакций</p>
+            <div class="p-5 text-center">
+                <i class="bi bi-inbox" style="font-size:2rem;color:var(--text-3);display:block;margin-bottom:0.75rem;"></i>
+                <p style="color:var(--text-3);font-size:0.85rem;margin-bottom:1rem;">Нет транзакций</p>
                 <a href="{% url 'transaction_add' %}" class="btn btn-sm btn-primary">Добавить</a>
             </div>
             {% endif %}
@@ -183,32 +204,40 @@
 
     <div class="col-md-6">
         <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-trophy me-2"></i>Активные цели</span>
-                <a href="{% url 'goal_list' %}" class="btn btn-sm btn-outline-secondary">Все →</a>
+            <div class="card-header">
+                <i class="bi bi-trophy text-purple-2"></i>
+                Активные цели
+                <a href="{% url 'goal_list' %}"
+                   class="btn btn-sm btn-outline-secondary ms-auto"
+                   style="font-size:0.75rem;">
+                    Все →
+                </a>
             </div>
             {% if goals %}
-            <div class="card-body">
+            <div class="p-4">
                 {% for goal in goals %}
-                <div class="mb-4">
+                <div class="mb-4 {% if not forloop.last %}pb-4{% endif %}"
+                     style="{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small fw-semibold">{{ goal.title }}</span>
-                        <span class="small fw-bold" style="color:#a78bfa;">{{ goal.progress_percent }}%</span>
+                        <span class="fw-600" style="font-size:0.875rem;">{{ goal.title }}</span>
+                        <span class="fw-700" style="font-size:0.82rem;color:var(--purple);">
+                            {{ goal.progress_percent }}%
+                        </span>
                     </div>
-                    <div class="progress mb-1" style="height:6px;">
+                    <div class="progress mb-1" style="height:5px;">
                         <div class="progress-bar" style="width:{{ goal.progress_percent }}%;"></div>
                     </div>
-                    <div class="d-flex justify-content-between">
-                        <small class="text-muted">{{ goal.current_amount }} сом</small>
-                        <small class="text-muted">{{ goal.target_amount }} сом</small>
+                    <div class="d-flex justify-content-between" style="font-size:0.75rem;color:var(--text-3);">
+                        <span>{{ goal.current_amount|floatformat:0 }} сом</span>
+                        <span>{{ goal.target_amount|floatformat:0 }} сом</span>
                     </div>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="card-body text-center py-5">
-                <i class="bi bi-trophy fs-2 text-muted d-block mb-2"></i>
-                <p class="text-muted small mb-3">Нет активных целей</p>
+            <div class="p-5 text-center">
+                <i class="bi bi-trophy" style="font-size:2rem;color:var(--text-3);display:block;margin-bottom:0.75rem;"></i>
+                <p style="color:var(--text-3);font-size:0.85rem;margin-bottom:1rem;">Нет активных целей</p>
                 <a href="{% url 'goal_add' %}" class="btn btn-sm btn-primary">Создать цель</a>
             </div>
             {% endif %}
@@ -222,20 +251,20 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const ctx = document.getElementById('expenseChart').getContext('2d');
-const chartData = {{ chart_data|safe }};
+const data = {{ chart_data|safe }};
 
 new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: chartData.labels,
+        labels: data.labels,
         datasets: [{
-            label: 'Расходы',
-            data: chartData.values,
-            backgroundColor: 'rgba(99,102,241,0.3)',
-            borderColor: 'rgba(129,140,248,0.8)',
-            borderWidth: 2,
-            borderRadius: 8,
+            data: data.values,
+            backgroundColor: 'rgba(99,102,241,0.25)',
+            borderColor: 'rgba(129,140,248,0.7)',
+            borderWidth: 1.5,
+            borderRadius: 7,
             borderSkipped: false,
+            hoverBackgroundColor: 'rgba(99,102,241,0.4)',
         }]
     },
     options: {
@@ -244,25 +273,24 @@ new Chart(ctx, {
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: 'rgba(10,14,30,0.9)',
-                borderColor: 'rgba(255,255,255,0.1)',
+                backgroundColor: 'rgba(8,11,24,0.95)',
+                borderColor: 'rgba(255,255,255,0.08)',
                 borderWidth: 1,
-                titleColor: '#94a3b8',
-                bodyColor: '#e2e8f0',
+                titleColor: '#64748b',
+                bodyColor: '#f1f5f9',
                 padding: 10,
-                callbacks: {
-                    label: ctx => `${ctx.parsed.y} сом`
-                }
+                cornerRadius: 10,
+                callbacks: { label: c => ` ${c.parsed.y} сом` }
             }
         },
         scales: {
             x: {
-                grid: { color: 'rgba(255,255,255,0.04)' },
-                ticks: { color: '#475569', font: { size: 11 } }
+                grid: { color: 'rgba(255,255,255,0.03)' },
+                ticks: { color: '#3f4d63', font: { size: 11, family: 'Inter' } }
             },
             y: {
-                grid: { color: 'rgba(255,255,255,0.04)' },
-                ticks: { color: '#475569', font: { size: 11 } },
+                grid: { color: 'rgba(255,255,255,0.03)' },
+                ticks: { color: '#3f4d63', font: { size: 11, family: 'Inter' } },
                 beginAtZero: true
             }
         }

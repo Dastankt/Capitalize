@@ -2,38 +2,52 @@
 {% block title %}Регистрация — Capitalize{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card p-4 mt-5">
-            <div class="text-center mb-4">
-                <h2 class="fw-800" style="background:linear-gradient(135deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
-                    💰 Capitalize
-                </h2>
-                <p class="text-muted small">Создай аккаунт и начни контролировать финансы</p>
-            </div>
+<div class="row justify-content-center align-items-center" style="min-height:80vh;">
+    <div class="col-md-4">
+
+        <div class="text-center mb-5">
+            <h1 class="fw-900 ls-tight mb-2" style="font-size:2rem;background:linear-gradient(135deg,#818cf8,#a78bfa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                ✦ Capitalize
+            </h1>
+            <p style="color:var(--text-3);font-size:0.875rem;">Начни управлять финансами уже сегодня</p>
+        </div>
+
+        <div class="card p-4">
+            <h5 class="fw-700 ls-tight mb-1">Создать аккаунт</h5>
+            <p style="color:var(--text-2);font-size:0.85rem;margin-bottom:1.5rem;">Это займёт меньше минуты</p>
+
             <form method="post">
                 {% csrf_token %}
                 {% for field in form %}
                 <div class="mb-3">
                     <label class="form-label">{{ field.label }}</label>
-                    <input type="{{ field.field.widget.input_type }}"
-                           name="{{ field.html_name }}"
-                           class="form-control {% if field.errors %}is-invalid{% endif %}"
-                           {% if field.value %}value="{{ field.value }}"{% endif %}>
+                    <input
+                        type="{{ field.field.widget.input_type }}"
+                        name="{{ field.html_name }}"
+                        class="form-control {% if field.errors %}is-invalid{% endif %}"
+                        {% if field.value %}value="{{ field.value }}"{% endif %}
+                        placeholder="{{ field.label }}">
                     {% for error in field.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
+                        <div class="invalid-feedback d-block mt-1" style="font-size:0.8rem;">
+                            <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
+                        </div>
                     {% endfor %}
                 </div>
                 {% endfor %}
-                <button type="submit" class="btn btn-primary w-100 mt-2">
-                    Создать аккаунт
+
+                <button type="submit" class="btn btn-primary w-100 mt-1" style="padding:0.7rem;">
+                    Создать аккаунт <i class="bi bi-arrow-right ms-1"></i>
                 </button>
             </form>
-            <p class="text-center mt-3 small" style="color:#475569;">
-                Уже есть аккаунт?
-                <a href="{% url 'login' %}" style="color:#818cf8;">Войти</a>
-            </p>
         </div>
+
+        <p class="text-center mt-3" style="color:var(--text-3);font-size:0.85rem;">
+            Уже есть аккаунт?
+            <a href="{% url 'login' %}" style="color:var(--purple);font-weight:600;text-decoration:none;">
+                Войти
+            </a>
+        </p>
+
     </div>
 </div>
 {% endblock %}

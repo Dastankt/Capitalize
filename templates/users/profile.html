@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Профиль — Capitalize{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-800 ls-tight mb-1">Профиль</h4>
+        <p style="color:var(--text-3);font-size:0.85rem;margin:0;">Личные данные и статистика</p>
+    </div>
+    <a href="{% url 'profile_edit' %}" class="btn btn-primary">
+        <i class="bi bi-pencil me-1"></i>Редактировать
+    </a>
+</div>
+
+<div class="row g-3">
+
+    <!-- Левая колонка -->
+    <div class="col-md-4">
+        <div class="card p-4 text-center">
+            {% if request.user.profile.avatar %}
+                <img src="{{ request.user.profile.avatar.url }}"
+                     class="rounded-circle mx-auto d-block mb-3"
+                     style="width:88px;height:88px;object-fit:cover;border:3px solid rgba(129,140,248,0.3);">
+            {% else %}
+                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3"
+                     style="width:88px;height:88px;background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(139,92,246,0.2));border:3px solid rgba(129,140,248,0.25);">
+                    <span style="font-size:2rem;font-weight:800;color:var(--purple);">
+                        {{ request.user.username|first|upper }}
+                    </span>
+                </div>
+            {% endif %}
+
+            <h5 class="fw-700 ls-tight mb-1">
+                {% if request.user.first_name %}
+                    {{ request.user.first_name }} {{ request.user.last_name }}
+                {% else %}
+                    {{ request.user.username }}
+                {% endif %}
+            </h5>
+            <p style="color:var(--text-3);font-size:0.82rem;margin-bottom:0.25rem;">
+                @{{ request.user.username }}
+            </p>
+            <p style="color:var(--text-3);font-size:0.82rem;margin-bottom:1.25rem;">
+                {{ request.user.email }}
+            </p>
+
+            <div class="p-3 rounded-12 mb-3"
+                 style="background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border:1px solid rgba(129,140,248,0.15);">
+                <p class="stat-label mb-1">Баланс</p>
+                <h4 class="fw-800 ls-tight mb-0" style="color:var(--purple);">
+                    {{ request.user.profile.balance|floatformat:0 }} сом
+                </h4>
+            </div>
+
+            <p style="color:var(--text-3);font-size:0.78rem;">
+                <i class="bi bi-calendar3 me-1"></i>
+                На сайте с {{ request.user.date_joined|date:"d.m.Y" }}
+            </p>
+        </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="col-md-8">
+        <div class="row g-3 mb-3">
+            <div class="col-6 fade-in-up">
+                <div class="stat-card text-center">
+                    <p class="stat-label">Транзакций</p>
+                    <h3 class="fw-800 ls-tight mb-0" style="color:var(--purple);">
+                        {{ total_transactions }}
+                    </h3>
+                </div>
+            </div>
+            <div class="col-6 fade-in-up">
+                <div class="stat-card text-center">
+                    <p class="stat-label">Целей создано</p>
+                    <h3 class="fw-800 ls-tight mb-0" style="color:var(--purple-2);">
+                        {{ total_goals }}
+                    </h3>
+                </div>
+            </div>
+            <div class="col-6 fade-in-up">
+                <div class="stat-card text-center">
+                    <p class="stat-label">Целей достигнуто</p>
+                    <h3 class="fw-800 ls-tight mb-0" style="color:var(--green);">
+                        {{ completed_goals }}
+                    </h3>
+                </div>
+            </div>
+            <div class="col-6 fade-in-up">
+                <div class="stat-card text-center">
+                    <p class="stat-label">Заработано</p>
+                    <h3 class="fw-800 ls-tight mb-0" style="color:var(--green);">
+                        {{ total_income|floatformat:0 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4">
+            <p class="section-title mb-4">
+                <i class="bi bi-arrow-left-right text-purple"></i>
+                Доходы vs Расходы
+            </p>
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <span style="font-size:0.82rem;color:var(--green);font-weight:600;">
+                        💚 Доходы
+                    </span>
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--text-2);">
+                        {{ total_income|floatformat:0 }} сом
+                    </span>
+                </div>
+                <div class="progress" style="height:7px;">
+                    <div class="progress-bar"
+                         style="width:{% if total_income or total_expense %}{% widthratio total_income total_income|add:total_expense 100 %}{% else %}0{% endif %}%;background:linear-gradient(90deg,#10b981,#34d399);">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span style="font-size:0.82rem;color:var(--red);font-weight:600;">
+                        ❤️ Расходы
+                    </span>
+                    <span style="font-size:0.82rem;font-weight:700;color:var(--text-2);">
+                        {{ total_expense|floatformat:0 }} сом
+                    </span>
+                </div>
+                <div class="progress" style="height:7px;">
+                    <div class="progress-bar"
+                         style="width:{% if total_income or total_expense %}{% widthratio total_expense total_income|add:total_expense 100 %}{% else %}0{% endif %}%;background:linear-gradient(90deg,#ef4444,#f87171);">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
