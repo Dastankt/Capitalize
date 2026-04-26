@@ -5,7 +5,7 @@ from .models import Transaction
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['title', 'amount', 'category', 'transaction_type']
+        fields = ['title', 'amount', 'category', 'transaction_type', 'note']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -23,10 +23,16 @@ class TransactionForm(forms.ModelForm):
             'transaction_type': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'note': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Необязательная заметка...'
+            }),
         }
         labels = {
             'title': 'Название',
             'amount': 'Сумма (сом)',
             'category': 'Категория',
             'transaction_type': 'Тип',
+            'note': 'Заметка',
         }

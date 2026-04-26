@@ -152,3 +152,86 @@ def profile_edit_view(request):
         'profile_form': profile_form,
     }
     return render(request, 'users/profile_edit.html', context)
+
+
+@login_required
+def report_view(request):
+    from transactions.models import Transaction
+    from django.utils import timezone
+    import json
+
+    # Текущий месяц по умолчанию
+    now = timezone.now()
+    month = int(request.GET.get('month', now.month))
+    year = int(request.GET.get('year', now.year))
+
+    # Все транзакции за выбранный месяц
+    transactions = Transaction.objects.filter(
+        user=request.user,
+        is_pending=False,
+        created_at__month=month,
+        created_at__year=year,
+    )
+
+    income_list = [t for t in transactions if t.transaction_type == 'income']
+    expense_list = [t for t in transactions if t.transaction_type == 'expense']
+
+    total_income = sum(t.amount for t in income_list)
+    total_expense = sum(t.amount for t in expense_list)
+    net = total_income - total_expense
+
+    # Статистика по категориям
+    stats = {
+        'base': sum(t.amount for t in expense_list if t.category == 'base'),
+        'wants': sum(t.amount for t in expense_list if t.category == 'wants'),
+        'invest': sum(t.amount for t in expense_list if t.category == 'invest'),
+    }
+    stats['total'] = stats['base'] + stats['wants'] + stats['invest'] or 1
+
+    # График расходов по дням месяца
+    import calendar
+    days_in_month = calendar.monthrange(year, month)[1]
+    daily_labels = [str(d) for d in range(1, days_in_month + 1)]
+    daily_expenses = []
+    daily_incomes = []
+
+    for day in range(1, days_in_month + 1):
+        day_expense = sum(
+            t.amount for t in expense_list
+            if t.created_at.day == day
+        )
+        day_income = sum(
+            t.amount for t in income_list
+            if t.created_at.day == day
+        )
+        daily_expenses.append(float(day_expense))
+        daily_incomes.append(float(day_income))
+
+    chart_data = json.dumps({
+        'labels': daily_labels,
+        'expenses': daily_expenses,
+        'incomes': daily_incomes,
+    })
+
+    # Список месяцев для селектора
+    months = [
+        (1, 'Январь'), (2, 'Февраль'), (3, 'Март'),
+        (4, 'Апрель'), (5, 'Май'), (6, 'Июнь'),
+        (7, 'Июль'), (8, 'Август'), (9, 'Сентябрь'),
+        (10, 'Октябрь'), (11, 'Ноябрь'), (12, 'Декабрь'),
+    ]
+
+    context = {
+        'transactions': transactions.order_by('-created_at'),
+        'total_income': total_income,
+        'total_expense': total_expense,
+        'net': net,
+        'stats': stats,
+        'chart_data': chart_data,
+        'months': months,
+        'current_month': month,
+        'current_year': year,
+        'month_name': months[month - 1][1],
+        'years': [2024, 2025, 2026],
+    }
+    return render(request, 'users/report.html', context)
