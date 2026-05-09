@@ -17,11 +17,14 @@ def transaction_list(request):
     # Фильтрация
     category = request.GET.get('category', '')
     tx_type = request.GET.get('type', '')
+    search = request.GET.get('search', '')
 
     if category:
         transactions = transactions.filter(category=category)
     if tx_type:
         transactions = transactions.filter(transaction_type=tx_type)
+    if search:
+        transactions = transactions.filter(title__icontains=search)
 
     stats = {
         'base': sum(t.amount for t in Transaction.objects.filter(user=request.user, is_pending=False, category='base', transaction_type='expense')),
@@ -35,6 +38,7 @@ def transaction_list(request):
         'stats': stats,
         'current_category': category,
         'current_type': tx_type,
+        'current_search': search,
     }
     return render(request, 'transactions/list.html', context)
 

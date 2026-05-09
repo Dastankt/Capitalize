@@ -8,7 +8,6 @@ class Transaction(models.Model):
         ('wants', '✨ Хотелки'),
         ('invest', '📈 Инвестиции'),
     ]
-
     TYPE_CHOICES = [
         ('income', 'Доход'),
         ('expense', 'Расход'),
@@ -19,6 +18,7 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Сумма')
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, verbose_name='Категория')
     transaction_type = models.CharField(max_length=10, choices=TYPE_CHOICES, verbose_name='Тип')
+    note = models.TextField(blank=True, null=True, verbose_name='Заметка')
     created_at = models.DateTimeField(auto_now_add=True)
     is_pending = models.BooleanField(default=False, verbose_name='Ожидает 24ч')
 
@@ -26,4 +26,4 @@ class Transaction(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.title} — {self.amount} {self.user.profile.currency}'
+        return f'{self.title} — {self.amount}'

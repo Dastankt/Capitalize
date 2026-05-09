@@ -83,39 +83,67 @@
 </div>
 {% endif %}
 
-<!-- Фильтры -->
+<!-- Поиск + Фильтры -->
 <div class="card p-3 mb-3">
-    <form method="get" class="row g-2 align-items-end">
-        <div class="col-md-4">
-            <label class="form-label">Категория</label>
-            <select name="category" class="form-select form-select-sm">
-                <option value="">Все категории</option>
-                <option value="base" {% if current_category == 'base' %}selected{% endif %}>🏠 База</option>
-                <option value="wants" {% if current_category == 'wants' %}selected{% endif %}>✨ Хотелки</option>
-                <option value="invest" {% if current_category == 'invest' %}selected{% endif %}>📈 Инвестиции</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Тип</label>
-            <select name="type" class="form-select form-select-sm">
-                <option value="">Все типы</option>
-                <option value="income" {% if current_type == 'income' %}selected{% endif %}>Доходы</option>
-                <option value="expense" {% if current_type == 'expense' %}selected{% endif %}>Расходы</option>
-            </select>
-        </div>
-        <div class="col-md-4 d-flex gap-2">
-            <button type="submit" class="btn btn-primary btn-sm w-100">
-                <i class="bi bi-funnel me-1"></i>Применить
-            </button>
-            <a href="{% url 'transaction_list' %}"
-               class="btn btn-outline-secondary btn-sm w-100">
-                Сброс
-            </a>
+    <form method="get">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Поиск</label>
+                <div class="position-relative">
+                    <i class="bi bi-search position-absolute"
+                       style="left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:0.85rem;"></i>
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           style="padding-left:2.2rem;"
+                           placeholder="Название транзакции..."
+                           value="{{ current_search }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Категория</label>
+                <select name="category" class="form-select form-select-sm">
+                    <option value="">Все категории</option>
+                    <option value="base" {% if current_category == 'base' %}selected{% endif %}>🏠 База</option>
+                    <option value="wants" {% if current_category == 'wants' %}selected{% endif %}>✨ Хотелки</option>
+                    <option value="invest" {% if current_category == 'invest' %}selected{% endif %}>📈 Инвестиции</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Тип</label>
+                <select name="type" class="form-select form-select-sm">
+                    <option value="">Все типы</option>
+                    <option value="income" {% if current_type == 'income' %}selected{% endif %}>Доходы</option>
+                    <option value="expense" {% if current_type == 'expense' %}selected{% endif %}>Расходы</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <a href="{% url 'transaction_list' %}"
+                   class="btn btn-outline-secondary btn-sm w-100">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
         </div>
     </form>
 </div>
 
-<!-- Список -->
+<!-- Заголовок списка -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="section-title mb-0">
+        <i class="bi bi-list-ul text-purple"></i>
+        Все операции
+        {% if current_search or current_category or current_type %}
+        <span style="background:rgba(129,140,248,0.1);color:var(--purple);border-radius:6px;padding:0.15rem 0.5rem;font-size:0.75rem;margin-left:8px;">
+            {{ transactions.count }} найдено
+        </span>
+        {% endif %}
+    </h6>
+</div>
+
+<!-- Список транзакций -->
 {% if transactions %}
 <div class="card">
     <ul class="list-group list-group-flush">
@@ -129,6 +157,11 @@
                 </div>
                 <div>
                     <p class="mb-0 fw-600" style="font-size:0.875rem;">{{ t.title }}</p>
+                    {% if t.note %}
+                    <p class="mb-0" style="font-size:0.78rem;color:var(--text-3);margin-top:2px;">
+                        <i class="bi bi-chat-left-text me-1"></i>{{ t.note }}
+                    </p>
+                    {% endif %}
                     <div class="d-flex align-items-center gap-2 mt-1">
                         <span class="badge-{% if t.category == 'base' %}base{% elif t.category == 'wants' %}wants{% else %}invest{% endif %}">
                             {{ t.get_category_display }}
@@ -155,14 +188,18 @@
 {% else %}
 <div class="card p-5 text-center">
     <i class="bi bi-inbox" style="font-size:2.5rem;color:var(--text-3);display:block;margin-bottom:1rem;"></i>
-    {% if current_category or current_type %}
-        <p style="color:var(--text-3);margin-bottom:1rem;">По фильтрам ничего не найдено</p>
-        <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary mx-auto" style="width:fit-content;">
+    {% if current_search or current_category or current_type %}
+        <p style="color:var(--text-3);margin-bottom:1rem;">По запросу ничего не найдено</p>
+        <a href="{% url 'transaction_list' %}"
+           class="btn btn-outline-secondary mx-auto"
+           style="width:fit-content;">
             Сбросить фильтры
         </a>
     {% else %}
         <p style="color:var(--text-3);margin-bottom:1rem;">Транзакций пока нет</p>
-        <a href="{% url 'transaction_add' %}" class="btn btn-primary mx-auto" style="width:fit-content;">
+        <a href="{% url 'transaction_add' %}"
+           class="btn btn-primary mx-auto"
+           style="width:fit-content;">
             <i class="bi bi-plus-lg me-1"></i>Добавить
         </a>
     {% endif %}

@@ -492,6 +492,12 @@
                         <i class="bi bi-trophy"></i> Цели
                     </a>
                 </li>
+                <li class="nav-item">
+    <a class="nav-link {% if request.resolver_match.url_name == 'report' %}active{% endif %}"
+       href="{% url 'report' %}">
+        <i class="bi bi-bar-chart-line"></i> Отчёт
+    </a>
+</li>
             </ul>
             <ul class="navbar-nav align-items-center gap-2">
                 <li class="nav-item">
