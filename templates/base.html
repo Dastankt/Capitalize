@@ -526,6 +526,11 @@
                                 <i class="bi bi-person"></i> Профиль
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                                <i class="bi bi-info-circle"></i> О продукте
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item" href="{% url 'logout' %}"
@@ -582,5 +587,234 @@
 </script>
 
 {% block extra_js %}{% endblock %}
+<!-- Стили модалки О продукте -->
+<style>
+.about-modal-content {
+    background: #13141f !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(99,102,241,0.25) !important;
+    color: #f1f5f9;
+}
+[data-theme="light"] .about-modal-content {
+    background: #ffffff !important;
+    border-color: rgba(99,102,241,0.2) !important;
+    color: #0f172a;
+}
+.about-modal-content .modal-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+[data-theme="light"] .about-modal-content .modal-header {
+    border-bottom-color: rgba(0,0,0,0.08);
+}
+.about-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.45rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.about-tab-btn.active {
+    background: rgba(99,102,241,0.15);
+    color: #818cf8;
+}
+[data-theme="light"] .about-tab-btn { color: #94a3b8; }
+[data-theme="light"] .about-tab-btn.active { background: rgba(99,102,241,0.1); color: #6366f1; }
+
+.about-feature-card {
+    background: #1c1e30 !important;
+    border: 1px solid rgba(255,255,255,0.06) !important;
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    height: 100%;
+}
+[data-theme="light"] .about-feature-card {
+    background: #f8f9ff !important;
+    border-color: rgba(0,0,0,0.07) !important;
+}
+.about-feature-card .feat-title { color: #f1f5f9; font-size: 0.875rem; font-weight: 700; margin-bottom: 0.3rem; }
+[data-theme="light"] .about-feature-card .feat-title { color: #0f172a; }
+.about-feature-card .feat-desc { color: #64748b; font-size: 0.8rem; line-height: 1.6; margin: 0; }
+
+/* Гайд шаги */
+.guide-step {
+    display: flex;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    background: #1c1e30;
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 0.6rem;
+}
+[data-theme="light"] .guide-step {
+    background: #f8f9ff;
+    border-color: rgba(0,0,0,0.06);
+}
+.guide-step-num {
+    min-width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#6366f1,#8b5cf6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; color: #fff;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+.guide-step-title { font-size: 0.85rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.2rem; }
+[data-theme="light"] .guide-step-title { color: #0f172a; }
+.guide-step-desc { font-size: 0.78rem; color: #64748b; line-height: 1.55; margin: 0; }
+</style>
+
+<!-- Модалка: О продукте -->
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content about-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-700">
+                    <span style="background:linear-gradient(135deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Capitalize</span>
+                    <span style="color:inherit;opacity:0.9;"> — о продукте</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"
+                        id="aboutModalClose"></button>
+<style>
+#aboutModalClose { opacity: 0.5; filter: invert(1); }
+[data-theme="light"] #aboutModalClose { filter: none; opacity: 0.6; }
+</style>
+            </div>
+
+            <!-- Табы -->
+            <div style="padding:0.75rem 1.25rem 0;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;gap:0.25rem;"
+                 id="aboutTabBar">
+                <button class="about-tab-btn active" onclick="switchAboutTab('about')">✦ О продукте</button>
+                <button class="about-tab-btn" onclick="switchAboutTab('guide')">📖 Гайд</button>
+            </div>
+
+            <div class="modal-body p-4">
+
+                <!-- ===== ВКЛАДКА: О ПРОДУКТЕ ===== -->
+                <div id="aboutTab">
+                    <p style="font-size:1.05rem;font-weight:700;margin-bottom:0.4rem;">
+                        Твои деньги — под контролем. Просто и умно.
+                    </p>
+                    <p style="font-size:0.875rem;color:#64748b;margin-bottom:1.75rem;line-height:1.7;">
+                        Capitalize помогает отслеживать доходы и расходы, копить на важные цели и принимать обдуманные финансовые решения — без лишней сложности.
+                    </p>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="about-feature-card">
+                                <div style="font-size:1.5rem;margin-bottom:0.5rem;">💰</div>
+                                <p class="feat-title">Учёт финансов</p>
+                                <p class="feat-desc">Записывай доходы и расходы по трём категориям: База, Хотелки, Инвестиции. Всегда знай, куда уходят деньги.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="about-feature-card">
+                                <div style="font-size:1.5rem;margin-bottom:0.5rem;">🎯</div>
+                                <p class="feat-title">Финансовые цели</p>
+                                <p class="feat-desc">Создавай цели — на отпуск, технику, образование — и откладывай на них прямо с баланса. Следи за прогрессом.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="about-feature-card">
+                                <div style="font-size:1.5rem;margin-bottom:0.5rem;">⏳</div>
+                                <p class="feat-title">Правило 24 часов</p>
+                                <p class="feat-desc">Крупные спонтанные траты уходят на паузу. Через сутки решаешь сам: подтвердить или отменить. Меньше импульсивных покупок.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="about-feature-card">
+                                <div style="font-size:1.5rem;margin-bottom:0.5rem;">📊</div>
+                                <p class="feat-title">Отчёты и аналитика</p>
+                                <p class="feat-desc">Графики расходов по дням и месяцам, разбивка по категориям. Понимай свои финансовые привычки и улучшай их.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size:0.78rem;color:#475569;text-align:center;margin-top:0.5rem;">
+                        Capitalize — сделано с ❤️ для тех, кто хочет жить осознаннее
+                    </p>
+                </div>
+
+                <!-- ===== ВКЛАДКА: ГАЙД ===== -->
+                <div id="guideTab" style="display:none;">
+                    <p style="font-size:1.05rem;font-weight:700;margin-bottom:0.3rem;">Как пользоваться Capitalize</p>
+                    <p style="font-size:0.85rem;color:#64748b;margin-bottom:1.25rem;line-height:1.6;">
+                        Пошаговый разбор всех функций — от первого входа до отчётов.
+                    </p>
+
+                    <div class="guide-step">
+                        <div class="guide-step-num">1</div>
+                        <div>
+                            <p class="guide-step-title">Пополни баланс</p>
+                            <p class="guide-step-desc">Нажми «+ Добавить» → выбери тип «Доход» → укажи сумму и категорию. Деньги сразу появятся на балансе. Это твоя отправная точка.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="guide-step-num">2</div>
+                        <div>
+                            <p class="guide-step-title">Записывай расходы по категориям</p>
+                            <p class="guide-step-desc">
+                                Каждая трата попадает в одну из трёх категорий:<br>
+                                🏠 <b>База</b> — аренда, еда, транспорт, коммуналка<br>
+                                ✨ <b>Хотелки</b> — кафе, одежда, развлечения<br>
+                                📈 <b>Инвестиции</b> — накопления, обучение, вложения
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="guide-step-num">3</div>
+                        <div>
+                            <p class="guide-step-title">Правило 24 часов — защита от импульсов</p>
+                            <p class="guide-step-desc">Если расход из «Хотелок» больше 500 сом — он уходит на ожидание. На дашборде появится карточка: подтвердить через сутки или отменить. Это даёт время подумать.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="guide-step-num">4</div>
+                        <div>
+                            <p class="guide-step-title">Ставь финансовые цели</p>
+                            <p class="guide-step-desc">Перейди в раздел «Цели» → создай цель с названием и нужной суммой. Пополняй её кнопкой «Внести» — деньги спишутся с баланса и зачислятся в цель.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="guide-step-num">5</div>
+                        <div>
+                            <p class="guide-step-title">Смотри отчёты</p>
+                            <p class="guide-step-desc">В разделе «Отчёт» выбери месяц и год — увидишь график доходов и расходов по дням, итоги и разбивку по категориям. Помогает понять, где тратишь больше всего.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-step">
+                        <div class="guide-step-num">6</div>
+                        <div>
+                            <p class="guide-step-title">Настрой профиль</p>
+                            <p class="guide-step-desc">В профиле можно сменить имя, загрузить аватар и выбрать валюту. Нажми на своё имя в шапке → «Профиль» → «Редактировать».</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /modal-body -->
+        </div>
+    </div>
+</div>
+
+<script>
+function switchAboutTab(tab) {
+    document.getElementById('aboutTab').style.display  = tab === 'about' ? '' : 'none';
+    document.getElementById('guideTab').style.display  = tab === 'guide' ? '' : 'none';
+    document.querySelectorAll('.about-tab-btn').forEach((b, i) => {
+        b.classList.toggle('active', (tab === 'about' && i === 0) || (tab === 'guide' && i === 1));
+    });
+}
+// Сброс на вкладку «О продукте» при каждом открытии
+document.getElementById('aboutModal').addEventListener('show.bs.modal', () => switchAboutTab('about'));
+</script>
+
 </body>
 </html>

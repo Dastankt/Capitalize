@@ -55,6 +55,140 @@
     </div>
 </div>
 
+<!-- Карточка приглашения -->
+<style>
+.invite-card {
+    background: linear-gradient(135deg, #1e1f3a 0%, #1a1b35 100%) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: rgba(99,102,241,0.3) !important;
+    position: relative;
+    overflow: hidden;
+}
+[data-theme="light"] .invite-card {
+    background: linear-gradient(135deg, #eef0ff 0%, #f0eeff 100%) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: rgba(99,102,241,0.2) !important;
+}
+.invite-card .invite-circle-1 {
+    position: absolute; top: -30px; right: -30px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: rgba(99,102,241,0.07); pointer-events: none;
+}
+.invite-card .invite-circle-2 {
+    position: absolute; bottom: -50px; right: 60px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: rgba(139,92,246,0.06); pointer-events: none;
+}
+[data-theme="light"] .invite-card .invite-circle-1 { background: rgba(99,102,241,0.06); }
+[data-theme="light"] .invite-card .invite-circle-2 { background: rgba(139,92,246,0.05); }
+
+/* Модалка */
+.invite-modal .modal-content {
+    background: #13141f !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid rgba(99,102,241,0.25) !important;
+    color: #f1f5f9;
+}
+[data-theme="light"] .invite-modal .modal-content {
+    background: #ffffff !important;
+    border-color: rgba(99,102,241,0.2) !important;
+    color: #0f172a;
+}
+.invite-modal .modal-header {
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    background: transparent;
+}
+[data-theme="light"] .invite-modal .modal-header {
+    border-bottom-color: rgba(0,0,0,0.08);
+}
+.invite-modal .modal-title { color: inherit; }
+.invite-modal .btn-close { filter: invert(1); opacity: 0.4; }
+[data-theme="light"] .invite-modal .btn-close { filter: none; opacity: 0.6; }
+.invite-modal .invite-link-input {
+    background: #1c1e30 !important;
+    border-color: rgba(255,255,255,0.08) !important;
+    color: #f1f5f9 !important;
+    font-size: 0.82rem;
+}
+[data-theme="light"] .invite-modal .invite-link-input {
+    background: #f1f3ff !important;
+    border-color: rgba(0,0,0,0.1) !important;
+    color: #0f172a !important;
+}
+.invite-modal .invite-link-input:focus {
+    border-color: rgba(99,102,241,0.5) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+}
+.invite-modal ul li { color: #94a3b8; }
+[data-theme="light"] .invite-modal ul li { color: #475569; }
+.invite-modal p { color: #94a3b8; }
+[data-theme="light"] .invite-modal p { color: #475569; }
+.invite-modal .modal-title, .invite-modal h5 { color: #f1f5f9 !important; }
+[data-theme="light"] .invite-modal .modal-title, [data-theme="light"] .invite-modal h5 { color: #0f172a !important; }
+</style>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 fade-in-up">
+        <div class="card p-4 invite-card" style="backdrop-filter:none!important;-webkit-backdrop-filter:none!important;">
+            <div class="invite-circle-1"></div>
+            <div class="invite-circle-2"></div>
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                    <p class="fw-700 mb-1" style="font-size:1rem;color:var(--text);">
+                        🎁 Пригласи друга в Capitalize
+                    </p>
+                    <p class="mb-0" style="font-size:0.83rem;color:var(--text-3);max-width:480px;">
+                        Помоги близким взять финансы под контроль — поделись приглашением и начните путь к финансовой свободе вместе.
+                    </p>
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#inviteModal" style="white-space:nowrap;">
+                    <i class="bi bi-person-plus-fill me-2"></i>Пригласить друга
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно приглашения -->
+<div class="modal fade invite-modal" id="inviteModal" tabindex="-1" aria-labelledby="inviteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-700" id="inviteModalLabel">
+                    <i class="bi bi-gift-fill me-2" style="color:var(--purple);"></i>
+                    Пригласить друга
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p style="color:var(--text-2);font-size:0.9rem;margin-bottom:1.25rem;">
+                    Capitalize — это личный финансовый менеджер, который помогает контролировать расходы, копить на цели и принимать взвешенные решения о тратах.
+                </p>
+                <ul style="color:var(--text-2);font-size:0.875rem;padding-left:1.25rem;margin-bottom:1.5rem;line-height:1.9;">
+                    <li>💰 Учёт доходов и расходов по категориям</li>
+                    <li>🎯 Финансовые цели с прогрессом</li>
+                    <li>⏳ Правило 24 часов для обдуманных покупок</li>
+                    <li>📊 Отчёты и аналитика по месяцам</li>
+                </ul>
+                <p class="fw-600 mb-2" style="font-size:0.85rem;color:var(--text-3);">Ссылка для регистрации:</p>
+                <div class="d-flex gap-2">
+                    <input type="text" id="inviteLink" class="form-control invite-link-input" readonly
+                           value="{{ request.scheme }}://{{ request.get_host }}{% url 'register' %}">
+                    <button class="btn btn-outline-secondary" onclick="copyInviteLink()" id="copyBtn" style="white-space:nowrap;">
+                        <i class="bi bi-copy"></i>
+                    </button>
+                </div>
+                <p id="copySuccess" style="display:none;font-size:0.78rem;color:var(--green);margin-top:0.5rem;">
+                    ✅ Ссылка скопирована!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Ожидающие -->
 {% if pending %}
 <div class="card mb-4" style="border-color:rgba(251,191,36,0.2);">
@@ -250,6 +384,20 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+function copyInviteLink() {
+    const input = document.getElementById('inviteLink');
+    navigator.clipboard.writeText(input.value).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const msg = document.getElementById('copySuccess');
+        btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+        msg.style.display = 'block';
+        setTimeout(() => {
+            btn.innerHTML = '<i class="bi bi-copy"></i>';
+            msg.style.display = 'none';
+        }, 2500);
+    });
+}
+
 const ctx = document.getElementById('expenseChart').getContext('2d');
 const data = {{ chart_data|safe }};
 
